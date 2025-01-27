@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIN Lookup</title>
+</head>
+<body>
+    <h2>VIN Lookup</h2>
+    <div id="vinForm">
+        <label for="vin">Enter VIN:</label>
+        <input type="text" id="vin" name="vin">
+        <button onclick="lookupVIN()">Submit</button>
+    </div>
+
+    <div id="additionalForm" style="display:none;">
+        <h3>Match Found! Kindly enter the customer contact number and your dealership name:</h3>
+        <label for="contactNumber">Contact Number:</label>
+        <input type="text" id="contactNumber">
+        <label for="dealershipName">Dealership Name:</label>
+        <input type="text" id="dealershipName">
+        <button onclick="submitDetails()">Submit Details</button>
+    </div>
+
+    <div id="responseMessage"></div>
+
+    <script>
+        function lookupVIN() {
+            let vin = document.getElementById("vin").value;
+            fetch(`/lookup?vin=${vin}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        document.getElementById("vinForm").style.display = "none";
+                        document.getElementById("additionalForm").style.display = "block";
+                    } else {
+                        document.getElementById("responseMessage").innerText = data.message;
+                    }
+                });
+        }
+
+        function submitDetails() {
+            let vin = document.getElementById("vin").value;
+            let contactNumber = document.getElementById("contactNumber").value;
+            let dealershipName = document.getElementById("dealershipName").value;
+
+            let details = {
+                vin: vin,
+                contactNumber: contactNumber,
+                dealershipName: dealershipName
+            };
+
+            fetch('/submitDetails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(details)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("responseMessage").innerText = data.message;
+                document.getElementById("additionalForm").style.display = "none";
+                document.getElementById("vinForm").style.display = "block";
+            });
+        }
+    </script>
+</body>
+</html>
